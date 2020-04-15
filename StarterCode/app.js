@@ -5,23 +5,30 @@ function getPlot(id) {
   d3.json("samples.json").then((sampleData) => {
     console.log(sampleData);
 
-    var wfreq = sampleData.metadata[0].wfreq;
+    var sampleid = sampleData.samples.filter(s => s.id == id);
+
+    var metadata = sampleData.metadata.filter(s => s.id == id);
+
+    console.log(metadata);
+
+
+    var wfreq = metadata[0].wfreq;
     console.log(wfreq);
 
-    var ids = sampleData.samples[0].otu_ids;
+    var ids = sampleid[0].otu_ids;
     console.log(ids);
 
-    var sampleValues = sampleData.samples[0].sample_values
+    var sampleValues = sampleid[0].sample_values
       .slice(0, 10)
       .reverse();
     console.log(sampleValues);
 
-    var labels = sampleData.samples[0].otu_labels.slice(0, 10);
+    var labels = sampleid[0].otu_labels.slice(0, 10);
     console.log(labels);
 
     // Getting only top 10 OTUs
 
-    var otu_top = sampleData.samples[0].otu_ids.slice(0, 10).reverse();
+    var otu_top = sampleid[0].otu_ids.slice(0, 10).reverse();
 
     // Changing OTU id format
 
@@ -29,7 +36,7 @@ function getPlot(id) {
     console.log(`OTU IDS: ${otu_id}`);
 
     // Getting the Top 10 Labels
-    var labels = sampleData.samples[0].otu_labels.slice(0, 10);
+    var labels = sampleid[0].otu_labels.slice(0, 10);
     console.log(`OTU Labels: ${labels}`);
 
     // Creating A trace
@@ -64,14 +71,14 @@ function getPlot(id) {
     // Creating A Bubble Chart
 
     var trace2 = {
-      x: sampleData.samples[0].otu_ids,
-      y: sampleData.samples[0].sample_values,
+      x: sampleid[0].otu_ids,
+      y: sampleid[0].sample_values,
       mode: "markers",
       marker: {
-        size: sampleData.samples[0].sample_values,
-        color: sampleData.samples[0].otu_ids,
+        size: sampleid[0].sample_values,
+        color: sampleid[0].otu_ids,
       },
-      text: sampleData.samples[0].otu_labels,
+      text: sampleid[0].otu_labels,
     };
 
     var chartData2 = [trace2];
@@ -123,7 +130,7 @@ function getdemoinfo(id) {
 
     console.log(metadata);
 
-    var result = metadata.filter((meta) => meta.id.toString() === id)[0];
+    var result = metadata.filter((meta) => meta.id.toString() == id)[0];
     // Putting The data into demographic Panel
 
     var demographicinfo = d3.select("#sample-metadata");
@@ -152,9 +159,14 @@ function optionChanged(id) {
 function init() {
 
     var dropdown = d3.select("#selDataset");
+   
+    
+
 
     d3.json("samples.json").then((data) => {
+      
         console.log(data)
+
 
 
         data.names.forEach(function(name) {
@@ -163,9 +175,10 @@ function init() {
 
         // Calling the Function to Display Selected Data
 
-        getPlot(data.names[0]);
         getdemoinfo(data.names[0]);
+        getPlot(data.names[0]);
+        dropdown.on("change",function(){console.log(this);getPlot(dropdown.node().value);getdemoinfo(dropdown.node().value)});
     });
-}
+  }
 
 init();
